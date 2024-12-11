@@ -3,14 +3,6 @@
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 use std::convert::From;
-use std::default;
-
-enum Direction {
-  Left,
-  Right,
-  Up,
-  Down,
-}
 
 #[derive(Clone, Default, PartialEq)]
 enum Tile {
@@ -205,7 +197,11 @@ impl Crawler {
 
     let mut is_dead_end = false;
     loop {
-      if self.current_node == *end || is_dead_end {
+      if is_dead_end {
+        self.nodes_crawled.clear();
+        break;
+      }
+      if self.current_node == *end {
         break;
       }
       let mut node = node_map.get(&self.current_node).unwrap().to_owned();
@@ -259,16 +255,14 @@ impl Crawler {
 struct Maze {
   node_map: NodeMap,
   crawler: Crawler,
-  start: Coord,
   end: Coord,
 }
 
 impl Maze {
-  fn new(node_map: NodeMap, crawler: Crawler, start: Coord, end: Coord) -> Self {
+  fn new(node_map: NodeMap, crawler: Crawler, end: Coord) -> Self {
     Self {
       node_map,
       crawler,
-      start,
       end,
     }
   }
@@ -301,7 +295,7 @@ impl Maze {
     for m in node_map.iter_mut() {
       m.1.neighbors.update_coord_heuristic(&temp_node_map);
     }
-    Self::new(node_map, Crawler::new(start), start, end)
+    Self::new(node_map, Crawler::new(start), end)
   }
 
   fn solve(&mut self) -> Vec<Coord> {
@@ -324,7 +318,6 @@ fn test() {
   ];
   let start = (0, 0);
   let end = (4, 3);
-
   let path = solve_maze(maze, start, end);
   assert_eq!(
     path,
@@ -336,7 +329,34 @@ fn test() {
       (2, 2), // right
       (2, 3), // right
       (3, 3), // down
-      (4, 3)  // down
+      (4, 3) // down
     ]
+  );
+
+  let maze = vec![
+    vec!['S', '#', '#', '#', '#'],
+    vec!['#', '#', '#', '#', '#'],
+    vec!['#', '#', '#', '#', '#'],
+    vec!['#', '#', '#', '#', '#'],
+    vec!['#', '#', '#', 'E', '#']
+  ];
+  let path = solve_maze(maze, start, end);
+  assert_eq!(
+    path,
+    vec![]
+  );
+
+  let maze = vec![
+    vec!['S', '.', '.', '#', 'E'],
+    vec!['#', '#', '.', '#', '#'],
+    vec!['#', '.', '.', '.', '#'],
+    vec!['#', '#', '#', '.', '#'],
+    vec!['#', '#', '#', '#', '#']
+  ];
+  let end = (0, 4);
+  let path = solve_maze(maze, start, end);
+  assert_eq!(
+    path,
+    vec![]
   );
 }
