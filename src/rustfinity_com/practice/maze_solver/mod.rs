@@ -2,10 +2,9 @@
 
 use std::cmp::PartialEq;
 use std::collections::HashMap;
-use std::convert::{From, Into};
+use std::convert::From;
 use std::default;
 
-#[derive(Debug)]
 enum Direction {
   Left,
   Right,
@@ -13,71 +12,43 @@ enum Direction {
   Down,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Default, PartialEq)]
 enum Tile {
   #[default]
   Wall,
   OpenPath,
 }
 
-#[derive(Debug)]
-enum Flag {
-  Start,
-  End,
-}
-
 type Coord = (usize, usize);
 
-#[derive(Debug, Default)]
-struct Coordinate {
-  x: usize,
-  y: usize,
-}
+#[derive(Clone, Default)]
+struct Coordinate(usize, usize);
 
-impl From<Coord> for Coordinate {
-  fn from(coord: Coord) -> Self {
-    Coordinate {
-      x: coord.0,
-      y: coord.1,
-    }
-  }
-}
-
-impl Into<Coord> for Coordinate {
-  fn into(self) -> Coord {
-    (self.x, self.y)
+impl From<&Coord> for Coordinate {
+  fn from(coord: &Coord) -> Self {
+    Coordinate(coord.0, coord.1)
   }
 }
 
 impl Coordinate {
-  fn new(x: usize, y: usize) -> Coordinate {
-    Coordinate { x, y }
-  }
-
-  fn top(&self) -> Option<Self> {
-    if self.y > 0 {
-      return Some(Self::new(self.x, self.y - 1));
+  fn top(&self) -> Option<Coord> {
+    if self.1 > 0 {
+      return Option::from((self.0, self.1 - 1));
     }
     None
   }
 
-  fn right(&self, end: Coord) -> Option<Self> {
-    if self.x < end.0 {
-      return Some(Self::new(self.x + 1, self.y));
-    }
-    None
+  fn right(&self) -> Option<Coord> {
+    Option::from((self.0 + 1, self.1))
   }
 
-  fn bottom(&self, end: Coord) -> Option<Self> {
-    if self.y < end.1 {
-      return Some(Self::new(self.x, self.y + 1));
-    }
-    None
+  fn bottom(&self) -> Option<Coord> {
+    Option::from((self.0, self.1 + 1))
   }
 
-  fn left(&self) -> Option<Self> {
-    if self.x > 0 {
-      return Some(Self::new(self.x - 1, self.y));
+  fn left(&self) -> Option<Coord> {
+    if self.0 > 0 {
+      return Option::from((self.0 - 1, self.1));
     }
     None
   }
@@ -85,73 +56,46 @@ impl Coordinate {
 
 impl PartialEq for Coordinate {
   fn eq(&self, other: &Self) -> bool {
-    self.x == other.x && self.y == other.y
+    self.0 == other.0 && self.1 == other.1
   }
 }
 
-#[derive(Debug, Default)]
-struct NeighborsCoordinateHeuristicPriority {
-  coordinate: Coordinate,
-  heuristic_score: i32,
-  priority: u8,
+#[derive(Clone, Default)]
+struct CoordHeuristic {
+  coord: Coord,
+  heuristic_score: Option<i32>,
 }
 
-impl NeighborsCoordinateHeuristicPriority {
-  fn new(coordinate: Coordinate) -> Self {
+impl CoordHeuristic {
+  fn new(coord: Coord) -> Self {
     Self {
-      coordinate,
-      ..Default::default()
+      coord,
+      heuristic_score: None,
     }
   }
-
-  fn update(&mut self, heuristic_score: i32, priority: u8) -> &Self {
-    self.heuristic_score = heuristic_score;
-    self.priority = priority;
-    self
-  }
 }
 
-#[derive(Debug, Default)]
-struct NodeNeighbors {
-  top: Option<NeighborsCoordinateHeuristicPriority>,
-  bottom: Option<NeighborsCoordinateHeuristicPriority>,
-  right: Option<NeighborsCoordinateHeuristicPriority>,
-  left: Option<NeighborsCoordinateHeuristicPriority>,
+#[derive(Clone, Default)]
+struct Neighbors {
+  top: Option<CoordHeuristic>,
+  bottom: Option<CoordHeuristic>,
+  right: Option<CoordHeuristic>,
+  left: Option<CoordHeuristic>,
 }
 
 type NodeMap = HashMap<Coord, Node>;
 
-impl NodeNeighbors {
-  fn init(current: Coord, end: Coord) -> Self {
-    let coordinate = Coordinate::from(current);
-    let top_coordinate = coordinate.top();
-    let right_coordinate = coordinate.right(end);
-    let bottom_coordinate = coordinate.bottom(end);
-    let left_coordinate = coordinate.left();
-    let mut top = None;
-    let mut right = None;
-    let mut bottom = None;
-    let mut left = None;
-    if top_coordinate.is_some() {
-      top = Some(NeighborsCoordinateHeuristicPriority::new(
-        top_coordinate.unwrap(),
-      ));
-    }
-    if right_coordinate.is_some() {
-      right = Some(NeighborsCoordinateHeuristicPriority::new(
-        right_coordinate.unwrap(),
-      ));
-    }
-    if bottom_coordinate.is_some() {
-      bottom = Some(NeighborsCoordinateHeuristicPriority::new(
-        bottom_coordinate.unwrap(),
-      ));
-    }
-    if left_coordinate.is_some() {
-      left = Some(NeighborsCoordinateHeuristicPriority::new(
-        left_coordinate.unwrap(),
-      ));
-    }
+impl Neighbors {
+  fn init(current: Coord) -> Self {
+    let init_coord_heuristic = |coord: Option<Coord>| match coord {
+      Some(coord) => Option::from(CoordHeuristic::new(coord)),
+      None => None,
+    };
+    let coordinate = Coordinate::from(&current);
+    let top = init_coord_heuristic(coordinate.top());
+    let right = init_coord_heuristic(coordinate.right());
+    let bottom = init_coord_heuristic(coordinate.bottom());
+    let left = init_coord_heuristic(coordinate.left());
     Self {
       top,
       right,
@@ -160,44 +104,66 @@ impl NodeNeighbors {
     }
   }
 
-  fn update(&mut self, node_map: &NodeMap) -> &Self {
-    todo!();
+  fn update_coord_heuristic(&mut self, node_map: &HashMap<Coord, Node>) -> &Self {
+    let try_update = |ch: &mut Option<CoordHeuristic>| {
+      if let Some(ch) = ch {
+        if let Some(node) = node_map.get(&ch.coord) {
+          if node.tile == Tile::OpenPath {
+            ch.heuristic_score = Option::from(node.heuristic_score);
+          }
+        }
+      }
+    };
+    try_update(&mut self.top);
+    try_update(&mut self.right);
+    try_update(&mut self.bottom);
+    try_update(&mut self.left);
+    if self.top.is_some() {
+      if self.top.clone().unwrap().heuristic_score.is_none() {
+        self.top = None;
+      }
+    }
+    if self.right.is_some() {
+      if self.right.clone().unwrap().heuristic_score.is_none() {
+        self.right = None;
+      }
+    }
+    if self.bottom.is_some() {
+      if self.bottom.clone().unwrap().heuristic_score.is_none() {
+        self.bottom = None;
+      }
+    }
+    if self.left.is_some() {
+      if self.left.clone().unwrap().heuristic_score.is_none() {
+        self.left = None;
+      }
+    }
     self
   }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Default)]
 struct Node {
   coordinate: Coordinate,
-  neighbors: NodeNeighbors,
+  neighbors: Neighbors,
   heuristic_score: i32,
-  next_visit_priority: Vec<Coord>,
   tile: Tile,
-  flag: Option<Flag>,
   is_visited: bool,
-  from: Option<Coordinate>,
+  from: Option<Coord>,
 }
 
 impl Node {
-  fn calculate_heuristic_score(current: Coord, end: Coord) -> i32 {
+  fn calculate_heuristic_score(current: &Coord, end: &Coord) -> i32 {
     i32::abs(end.0 as i32 - current.0 as i32) + i32::abs(end.1 as i32 - current.1 as i32)
   }
 
-  fn init(coord: Coord, tile: Tile, end: Coord) -> Self {
+  fn init(coord: Coord, tile: Tile, end: &Coord) -> Self {
     Self {
-      coordinate: Coordinate::from(coord),
-      neighbors: NodeNeighbors::init(coord, end),
-      heuristic_score: Self::calculate_heuristic_score(coord, end),
-      next_visit_priority: Vec::new(),
+      coordinate: Coordinate::from(&coord),
+      neighbors: Neighbors::init(coord),
+      heuristic_score: Self::calculate_heuristic_score(&coord, end),
       tile,
       ..Default::default()
-    }
-  }
-
-  fn init_with_flag(coord: Coord, tile: Tile, end: Coord, flag: Option<Flag>) -> Self {
-    Self {
-      flag,
-      ..Self::init(coord, tile, end)
     }
   }
 
@@ -206,9 +172,9 @@ impl Node {
     self
   }
 
-  fn set_from(&mut self, coord: Coordinate) -> &Self {
+  fn set_from(&mut self, coord: Coord) -> &Self {
     if self.from.is_none() {
-      self.from = Some(coord);
+      self.from = Option::from(coord);
     }
     self
   }
@@ -221,74 +187,93 @@ impl PartialEq for Node {
 }
 
 #[derive(Debug)]
-enum NodeLinkedList {
-  Nil,
-  Content(Node, Box<NodeLinkedList>),
-}
-
-impl NodeLinkedList {
-  fn new() -> Self {
-    Self::Nil
-  }
-
-  fn prepend(self, node: Node) -> Self {
-    Self::Content(node, Box::new(self))
-  }
-
-  fn len(&self) -> u32 {
-    match *self {
-      Self::Content(_, ref tail) => 1 + tail.len(),
-      Self::Nil => 0,
-    }
-  }
-}
-
-#[derive(Debug)]
 struct Crawler {
-  current_node: Node,
-  nodes_crawled: NodeLinkedList,
+  current_node: Coord,
+  nodes_crawled: Vec<Coord>,
 }
 
 impl Crawler {
-  fn new(current_node: Node) -> Self {
+  fn new(current_node: Coord) -> Self {
     Self {
       current_node,
-      nodes_crawled: NodeLinkedList::new(),
+      nodes_crawled: vec![current_node],
     }
   }
 
-  fn crawl(&mut self, end: Coord) -> &Self {
-    let top_coordinate = self.current_node.coordinate.top();
-    let right_coordinate = self.current_node.coordinate.right(end);
-    let bottom_coordinate = self.current_node.coordinate.bottom(end);
-    let left_coordinate = self.current_node.coordinate.left();
-    if top_coordinate.is_some() {}
-    todo!();
-    self
+  fn crawl(&mut self, node_map: &mut HashMap<Coord, Node>, end: &Coord) -> Vec<Coord> {
+    self.nodes_crawled = vec![self.current_node];
+
+    let mut is_dead_end = false;
+    loop {
+      if self.current_node == *end || is_dead_end {
+        break;
+      }
+      let mut node = node_map.get(&self.current_node).unwrap().to_owned();
+      let mut neighbors: Vec<CoordHeuristic> = Vec::new();
+      let mut try_add = |ch: &Option<CoordHeuristic>| {
+        if let Some(ch) = ch {
+          neighbors.push(ch.clone());
+        }
+      };
+      try_add(&node.neighbors.top);
+      try_add(&node.neighbors.right);
+      try_add(&node.neighbors.bottom);
+      try_add(&node.neighbors.left);
+      neighbors.sort_by(|a, b| a.heuristic_score.cmp(&b.heuristic_score));
+
+      let mut i = 0;
+      let mut is_forward = false;
+      loop {
+        if i == neighbors.len() {
+          break;
+        }
+        let mut next_node = node_map.get(&neighbors[i].coord).unwrap().to_owned();
+        if !next_node.is_visited {
+          is_forward = true;
+          node.mark_as_visited();
+          node_map.insert(self.current_node, node.to_owned());
+          next_node.set_from(self.current_node);
+          node_map.insert(neighbors[i].coord, next_node.to_owned());
+          self.nodes_crawled.push(neighbors[i].coord);
+          self.current_node = neighbors[i].coord;
+          break;
+        }
+        i += 1;
+      }
+      if !is_forward {
+        let prev_coord = node.from;
+        if prev_coord.is_some() {
+          node.mark_as_visited();
+          node_map.insert(self.current_node, node.to_owned());
+          self.nodes_crawled.pop();
+          self.current_node = prev_coord.unwrap();
+        } else {
+          is_dead_end = true;
+        }
+      }
+    }
+    self.nodes_crawled.clone()
   }
 }
 
-#[derive(Debug)]
 struct Maze {
   node_map: NodeMap,
   crawler: Crawler,
+  start: Coord,
+  end: Coord,
 }
 
 impl Maze {
-  fn new(node_map: NodeMap, crawler: Crawler) -> Self {
-    Self { node_map, crawler }
+  fn new(node_map: NodeMap, crawler: Crawler, start: Coord, end: Coord) -> Self {
+    Self {
+      node_map,
+      crawler,
+      start,
+      end,
+    }
   }
 
   fn init(vec: Vec<Vec<char>>, start: Coord, end: Coord) -> Self {
-    let flag = |coord: Coord| -> Option<Flag> {
-      if coord == start {
-        return Some(Flag::Start);
-      } else if coord == end {
-        return Some(Flag::End);
-      }
-      None
-    };
-
     let mut node_map: NodeMap = HashMap::new();
     let mut x = 0;
     loop {
@@ -306,25 +291,21 @@ impl Maze {
           '.' | 'S' | 'E' => Tile::OpenPath,
           _ => Tile::Wall,
         };
-        let node = Node::init_with_flag(coord, tile, end, flag(coord));
+        let node = Node::init(coord, tile, &end);
         node_map.insert(coord, node);
         y += 1;
       }
       x += 1;
     }
-    Self::new(
-      node_map,
-      Crawler::new(Node::init(start, Tile::OpenPath, end)),
-    )
+    let temp_node_map = node_map.clone();
+    for m in node_map.iter_mut() {
+      m.1.neighbors.update_coord_heuristic(&temp_node_map);
+    }
+    Self::new(node_map, Crawler::new(start), start, end)
   }
 
-  fn find_node_by_coord(&self, coord: Coord) -> Option<&Node> {
-    self.node_map.get(&coord)
-  }
-
-  fn solve(&self) -> Vec<Coord> {
-    let vec = Vec::new();
-    vec
+  fn solve(&mut self) -> Vec<Coord> {
+    self.crawler.crawl(&mut self.node_map, &self.end)
   }
 }
 
@@ -335,27 +316,27 @@ pub fn solve_maze(maze: Vec<Vec<char>>, start: Coord, end: Coord) -> Vec<Coord> 
 #[test]
 fn test() {
   let maze = vec![
-    vec!['S', '.', '#', '#', '#'],
+    vec!['S', '.', '.', '#', '#'],
     vec!['#', '.', '#', '.', '.'],
     vec!['#', '.', '.', '.', '#'],
-    vec!['#', '#', '#', '.', '#'],
-    vec!['#', '#', '#', 'E', '#'],
+    vec!['#', '.', '#', '.', '#'],
+    vec!['#', '.', '#', 'E', '#'],
   ];
   let start = (0, 0);
   let end = (4, 3);
 
-  let _ = solve_maze(maze, start, end);
-  // assert_eq!(
-  //   path,
-  //   vec![
-  //     (0, 0), // starting point
-  //     (0, 1), // right
-  //     (1, 1), // down
-  //     (2, 1), // down
-  //     (2, 2), // right
-  //     (2, 3), // right
-  //     (3, 3), // down
-  //     (4, 3)  // down
-  //   ]
-  // );
+  let path = solve_maze(maze, start, end);
+  assert_eq!(
+    path,
+    vec![
+      (0, 0), // starting point
+      (0, 1), // right
+      (1, 1), // down
+      (2, 1), // down
+      (2, 2), // right
+      (2, 3), // right
+      (3, 3), // down
+      (4, 3)  // down
+    ]
+  );
 }
