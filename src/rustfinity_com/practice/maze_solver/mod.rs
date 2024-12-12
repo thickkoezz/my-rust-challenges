@@ -1,7 +1,7 @@
 // https://www.rustfinity.com/practice/rust/challenges/maze-solver/description
 
 use std::cmp::PartialEq;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::convert::From;
 
 #[derive(Clone, Default, PartialEq)]
@@ -303,8 +303,44 @@ impl Maze {
   }
 }
 
+// solution #1, long and not effective, just want to test data structure
 pub fn solve_maze(maze: Vec<Vec<char>>, start: Coord, end: Coord) -> Vec<Coord> {
   Maze::init(maze, start, end).solve()
+}
+
+// solution #2, short and effective
+pub fn solve_maze_2(maze: Vec<Vec<char>>, start: Coord, end: Coord) -> Vec<Coord> {
+  let directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]; // right, down, left, up
+  let rows = maze.len();
+  let cols = maze[0].len();
+  let mut queue = VecDeque::new();
+  queue.push_back((start, vec![start]));
+  let mut visited = vec![vec![false; cols]; rows];
+  println!("visited {:?}", visited);
+  visited[start.0][start.1] = true;
+  while let Some((current, path)) = queue.pop_front() {
+    let (x, y) = current;
+    if current == end {
+      return path;
+    }
+    // Check all 4 possible directions
+    for &(dx, dy) in &directions {
+      let nx = x as isize + dx;
+      let ny = y as isize + dy;
+      // Ensure the next position is within bounds and not a wall, and hasn't been visited
+      if nx >= 0 && ny >= 0 && nx < rows as isize && ny < cols as isize {
+        let nx = nx as usize;
+        let ny = ny as usize;
+        if !visited[nx][ny] && maze[nx][ny] != '#' {
+          visited[nx][ny] = true;
+          let mut new_path = path.clone();
+          new_path.push((nx, ny));
+          queue.push_back(((nx, ny), new_path));
+        }
+      }
+    }
+  }
+  vec![]
 }
 
 #[test]
@@ -329,7 +365,7 @@ fn test() {
       (2, 2), // right
       (2, 3), // right
       (3, 3), // down
-      (4, 3) // down
+      (4, 3)  // down
     ]
   );
 
@@ -338,25 +374,19 @@ fn test() {
     vec!['#', '#', '#', '#', '#'],
     vec!['#', '#', '#', '#', '#'],
     vec!['#', '#', '#', '#', '#'],
-    vec!['#', '#', '#', 'E', '#']
+    vec!['#', '#', '#', 'E', '#'],
   ];
   let path = solve_maze(maze, start, end);
-  assert_eq!(
-    path,
-    vec![]
-  );
+  assert_eq!(path, vec![]);
 
   let maze = vec![
     vec!['S', '.', '.', '#', 'E'],
     vec!['#', '#', '.', '#', '#'],
     vec!['#', '.', '.', '.', '#'],
     vec!['#', '#', '#', '.', '#'],
-    vec!['#', '#', '#', '#', '#']
+    vec!['#', '#', '#', '#', '#'],
   ];
   let end = (0, 4);
   let path = solve_maze(maze, start, end);
-  assert_eq!(
-    path,
-    vec![]
-  );
+  assert_eq!(path, vec![]);
 }
