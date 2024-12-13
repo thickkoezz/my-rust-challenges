@@ -1,9 +1,7 @@
 use std::{cmp::Ordering, error::Error, ops::Deref};
 
 // 1. Update the function signature to accept and return references to Locations
-pub fn find_most_dense_location(
-  locations: &[Location],
-) -> Result<&Location, Box<dyn Error>> {
+pub fn find_most_dense_location(locations: &[Location]) -> Result<&Location, Box<dyn Error>> {
   locations
     .iter()
     .max_by(|a, b| {
