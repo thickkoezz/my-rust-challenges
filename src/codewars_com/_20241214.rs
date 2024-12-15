@@ -69,7 +69,10 @@ fn are_you_playing_banjo(name: &str) -> String {
 
 #[test]
 fn test_are_you_playing_banjo() {
-  assert_eq!(are_you_playing_banjo("Martin"), "Martin does not play banjo");
+  assert_eq!(
+    are_you_playing_banjo("Martin"),
+    "Martin does not play banjo"
+  );
   assert_eq!(are_you_playing_banjo("Rikke"), "Rikke plays banjo");
   assert_eq!(are_you_playing_banjo("bravo"), "bravo does not play banjo");
   assert_eq!(are_you_playing_banjo("rolf"), "rolf plays banjo");
@@ -91,10 +94,20 @@ fn test_grow() {
 fn find_short(s: &str) -> u32 {
   let solution_1 = || {
     let mut ws: Vec<_> = s.split_whitespace().map(String::from).collect();
-    ws.into_iter().map(|s| s.len()).collect::<Vec<usize>>().into_iter().min().unwrap() as u32
+    ws.into_iter()
+      .map(|s| s.len())
+      .collect::<Vec<usize>>()
+      .into_iter()
+      .min()
+      .unwrap() as u32
   };
 
-  let solution_2 = || s.split_whitespace().map(|word| word.len()).min().unwrap_or(0) as u32;
+  let solution_2 = || {
+    s.split_whitespace()
+      .map(|word| word.len())
+      .min()
+      .unwrap_or(0) as u32
+  };
 
   solution_2()
 }
@@ -103,10 +116,16 @@ fn find_short(s: &str) -> u32 {
 fn test_find_short() {
   fn inner(s: &str, expected: u32) {
     let actual = find_short(s);
-    assert_eq!(actual, expected, "With s = \"{s}\"\nExpected {expected} but got {actual}")
+    assert_eq!(
+      actual, expected,
+      "With s = \"{s}\"\nExpected {expected} but got {actual}"
+    )
   }
   inner("bitcoin take over the world maybe who knows perhaps", 3);
-  inner("turns out random test cases are easier than writing out basic ones", 3);
+  inner(
+    "turns out random test cases are easier than writing out basic ones",
+    3,
+  );
   inner("lets talk about javascript the best language", 3);
   inner("i want to travel the world writing code one day", 1);
   inner("Lets all go on holiday somewhere very cold", 2);
