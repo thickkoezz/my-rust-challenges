@@ -3,8 +3,13 @@ use std::str::FromStr;
 
 // https://www.codewars.com/kata/5556282156230d0e5e000089/rust
 fn dna_to_rna(dna: &str) -> String {
+  // solution #1
   dna.replace("T", "U")
+
+  // solution #2
   // dna.chars().into_iter().map(|x| if x == 'T' { 'U' } else { x }).collect()
+
+  // solution #3
   // dna.chars().map(|c| match c {
   //   'G' => 'G',
   //   'C' => 'C',
@@ -88,6 +93,7 @@ const ERR_MSG: &str = "\nYour result (left) did not match the expected output (r
 
 // https://www.codewars.com/kata/5bb904724c47249b10000131/train/rust
 fn points(games: &[String]) -> u32 {
+  // solution #1
   games
     .iter()
     .map(|s| {
@@ -99,6 +105,8 @@ fn points(games: &[String]) -> u32 {
       }
     })
     .sum()
+
+  // solution #2
   /* let mut point = 0;
   games.iter().for_each(|game| {
     let scores = game
