@@ -173,13 +173,13 @@ fn get_grade(s1: u16, s2: u16, s3: u16) -> char {
 
 #[test]
 fn test_get_grade() {
-  fn inner(s1: u16, s2: u16, s3: u16, expected: char) {
+  let inner = |s1: u16, s2: u16, s3: u16, expected: char| {
     let actual = get_grade(s1, s2, s3);
     assert_eq!(
       actual, expected,
       "With s1 = {s1}, s2 = {s2}, s = {s3}\nExpected '{expected}' but got '{actual}'"
     )
-  }
+  };
   inner(100, 100, 100, 'A');
   inner(95, 90, 93, 'A');
   inner(82, 85, 87, 'B');
@@ -227,13 +227,13 @@ fn same_length(txt: &str) -> bool {
 
 #[test]
 fn test_same_length() {
-  fn inner(txt: &str, expected: bool) {
+  let inner = |txt: &str, expected: bool| {
     let actual = same_length(txt);
     assert_eq!(
       actual, expected,
       "With txt = \"{txt}\"\nExpected {expected} but got {actual}"
     )
-  }
+  };
   inner("0", false);
   inner("10", true);
   inner("1010", true);
@@ -275,14 +275,14 @@ fn find_uniq(arr: &[f64]) -> f64 {
 
 #[test]
 fn test_find_uniq() {
-  fn inner(arr: &[f64], expected: f64) {
+  let inner = |arr: &[f64], expected: f64| {
     assert_eq!(
       find_uniq(arr),
       expected,
       "\nleft is your output. right is expected output.\n input: `{:?}`\n",
       arr
     );
-  }
+  };
   inner(&[0.0, 1.0, 0.0], 1.0);
   inner(&[1.0, 1.0, 1.0, 2.0, 1.0, 1.0], 2.0);
   inner(&[3.0, 10.0, 3.0, 3.0, 3.0], 10.0);

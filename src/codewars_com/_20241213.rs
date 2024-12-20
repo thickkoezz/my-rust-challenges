@@ -222,13 +222,13 @@ fn count_positives_sum_negatives(input: Vec<i32>) -> Vec<i32> {
 
 #[test]
 fn test_count_positives_sum_negatives() {
-  fn inner(a: &[i32], expected: &[i32]) {
+  let inner = |a: &[i32], expected: &[i32]| {
     let actual = count_positives_sum_negatives(a.to_vec());
     assert_eq!(
       actual, expected,
       "With input = {a:?}\nExpected {expected:?} but got {actual:?}"
     )
-  }
+  };
   inner(
     &[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -11, -12, -13, -14, -15],
     &[10, -65],
@@ -282,10 +282,10 @@ fn fibonacci(n: u32) -> u32 {
 
 #[test]
 fn test_fibonacci() {
-  fn inner(n: u32, expected: u32) {
+  let inner = |n: u32, expected: u32| {
     let msg = "\nYour result (left) did not match the expected output (right)";
     assert_eq!(fibonacci(n), expected, "{msg} with n = {n}")
-  }
+  };
   inner(0, 0);
   inner(1, 1);
   inner(2, 1);
@@ -329,13 +329,13 @@ fn dna_strand(dna: &str) -> String {
 
 #[test]
 fn fixed_dna_strand() {
-  fn inner(s: &str, expected: &str) {
+  let inner = |s: &str, expected: &str| {
     let actual = dna_strand(s);
     assert_eq!(
       actual, expected,
       "With dna = \"{s}\"\nExpected \"{expected}\" but got \"{actual}\""
     )
-  }
+  };
   inner("AAAA", "TTTT");
   inner("ATTGC", "TAACG");
   inner("GTAT", "CATA");
@@ -401,10 +401,10 @@ fn min_max(lst: &[i32]) -> (i32, i32) {
 
 #[test]
 fn test_min_max() {
-  fn inner(arr: &[i32], expected: (i32, i32)) {
+  let inner = |arr: &[i32], expected: (i32, i32)| {
     let msg = "\nYour result (left) did not match the expected output (right)";
     assert_eq!(min_max(arr), expected, "{msg} with lst = {arr:?}")
-  }
+  };
   for (arr, expected) in [
     (vec![1, 2, 3, 4, 5], (1, 5)),
     (vec![2334454, 5], (5, 2334454)),
@@ -422,13 +422,13 @@ fn find_next_square(sq: u64) -> Option<u64> {
 
 #[test]
 fn test_find_next_square() {
-  fn inner(n: u64, expected: Option<u64>) {
+  let inner = |n: u64, expected: Option<u64>| {
     let actual = find_next_square(n);
     assert_eq!(
       actual, expected,
       "\nYour result (left), did not match the correct answer (right) for n = {n}"
     );
-  }
+  };
   inner(121, Some(144));
   inner(625, Some(676));
   inner(319_225, Some(320_356));
@@ -457,14 +457,14 @@ fn century(year: u32) -> u32 {
 
 #[test]
 fn test_century() {
-  fn inner(year: u32, expected: u32) {
+  let inner = |year: u32, expected: u32| {
     let actual = century(year);
     assert_eq!(
       actual, expected,
       "\n\nFor year = {}\n expected: {}\n actual: {}",
       year, expected, actual
     );
-  }
+  };
   inner(1905, 20);
   inner(1700, 17);
   inner(89, 1);

@@ -71,13 +71,13 @@ fn going_zero_or_infinity(n: i32) -> f64 {
       _ => (n as f64).mul(factorial(n - 1)),
     }
   }
-  fn sum_factorial(n: i32) -> f64 {
+  let sum_factorial = |n: i32| -> f64 {
     let mut sum = 0f64;
     for i in 1..=n {
       sum.add_assign(factorial(i));
     }
     sum
-  }
+  };
   // f64::max((1.0e-0_f64.div(factorial(n))).mul(sum_factorial(n)), 1.0e-40)
   1.0e-0_f64.div(factorial(n)).mul(sum_factorial(n))
 }
@@ -86,7 +86,7 @@ use float_eq::float_eq;
 
 #[test]
 fn test_going_zero_or_infinity() {
-  fn inner(n: i32, expected: f64) {
+  let inner = |n: i32, expected: f64| {
     let actual = going_zero_or_infinity(n);
     println!("n {} -- actual: {}", n, actual);
     let merr = 1.0e-6;
@@ -96,7 +96,7 @@ fn test_going_zero_or_infinity() {
       "For n = {n}\nExpected value must be near: {:e} but was:{:e}",
       expected, actual
     );
-  }
+  };
   inner(5, 1.275);
   inner(6, 1.2125);
   inner(7, 1.173214);

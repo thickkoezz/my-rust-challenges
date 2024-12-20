@@ -7,7 +7,7 @@ pub struct Ready;
 pub struct Flying;
 
 pub struct Sleigh<State> {
-  state: PhantomData<State>
+  state: PhantomData<State>,
 }
 impl Sleigh<Empty> {
   pub fn new() -> Self {

@@ -23,33 +23,28 @@ fn test_reverse_words() {
 
 // https://www.codewars.com/kata/55c45be3b2079eccff00010f/train/rust
 fn order(sentence: &str) -> String {
-  fn solution_1(sentence: &str) -> String {
-    let vec = sentence.split(" ").collect::<Vec<&str>>();
-    let mut x = 0;
-    let mut res = vec![];
-    loop {
-      if x == vec.len() {
-        break;
-      }
-      let a = (x + 1).to_string();
-      let ch = a.as_str();
-      let item = vec.iter().find(|&&x| x.contains(ch));
-      if item.is_some() {
-        res.push(*item.unwrap());
-      }
-      x += 1;
+  // solution #1
+  let vec = sentence.split(" ").collect::<Vec<&str>>();
+  let mut x = 0;
+  let mut res = vec![];
+  loop {
+    if x == vec.len() {
+      break;
     }
-    res.join(" ")
+    let a = (x + 1).to_string();
+    let ch = a.as_str();
+    let item = vec.iter().find(|&&x| x.contains(ch));
+    if item.is_some() {
+      res.push(*item.unwrap());
+    }
+    x += 1;
   }
+  res.join(" ")
 
-  // best practice
-  fn solution_2(sentence: &str) -> String {
-    let mut ws: Vec<_> = sentence.split_whitespace().map(String::from).collect();
-    ws.sort_by_key(|s| s.chars().find(|c| c.is_digit(10)).unwrap());
-    ws.join(" ")
-  }
-
-  solution_2(sentence)
+  // solution #2, best practice
+  // let mut res: Vec<_> = sentence.split_whitespace().map(String::from).collect();
+  // res.sort_by_key(|s| s.chars().find(|c| c.is_digit(10)).unwrap());
+  // res.join(" ")
 }
 
 #[test]
@@ -92,35 +87,31 @@ fn test_grow() {
 
 // https://www.codewars.com/kata/57cebe1dc6fdc20c57000ac9/train/rust
 fn find_short(s: &str) -> u32 {
-  let solution_1 = || {
-    let mut ws: Vec<_> = s.split_whitespace().map(String::from).collect();
-    ws.into_iter()
-      .map(|s| s.len())
-      .collect::<Vec<usize>>()
-      .into_iter()
-      .min()
-      .unwrap() as u32
-  };
+  // solution #1
+  let mut ws: Vec<_> = s.split_whitespace().map(String::from).collect();
+  ws.into_iter()
+    .map(|s| s.len())
+    .collect::<Vec<usize>>()
+    .into_iter()
+    .min()
+    .unwrap() as u32
 
-  let solution_2 = || {
-    s.split_whitespace()
-      .map(|word| word.len())
-      .min()
-      .unwrap_or(0) as u32
-  };
-
-  solution_2()
+  // solution #2, best practice
+  // s.split_whitespace()
+  //   .map(|word| word.len())
+  //   .min()
+  //   .unwrap_or(0) as u32
 }
 
 #[test]
 fn test_find_short() {
-  fn inner(s: &str, expected: u32) {
+  let inner = |s: &str, expected: u32| {
     let actual = find_short(s);
     assert_eq!(
       actual, expected,
       "With s = \"{s}\"\nExpected {expected} but got {actual}"
     )
-  }
+  };
   inner("bitcoin take over the world maybe who knows perhaps", 3);
   inner(
     "turns out random test cases are easier than writing out basic ones",
