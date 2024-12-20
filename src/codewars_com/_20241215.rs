@@ -3,7 +3,7 @@ fn binary_slice_to_number(slice: &[u32]) -> u32 {
   // solution #1
   let str = slice
     .iter()
-    .map(|x| format!("{x}"))
+    .map(|x| x.to_string())
     .collect::<Vec<String>>()
     .concat();
   u32::from_str_radix(str.as_str(), 2).unwrap()
@@ -80,7 +80,8 @@ fn sort_array(arr: &[i32]) -> Vec<i32> {
 
   // solution #2: using itertools, best practice
   // let mut odds = arr.iter().filter(|&x| x % 2 != 0).sorted();
-  // arr.iter().map(|x| if x % 2 != 0 { odds.next().unwrap() } else { x }).cloned().collect()
+  // arr.iter().map(|x| if x % 2 != 0 { odds.next().unwrap() } else { x }).cloned().collect() // alternative #1
+  // arr.iter().map(|x| *(if x % 2 != 0 { odds.next().unwrap() } else { x })).collect() // alternative #2, same as above
 }
 
 #[test]
@@ -284,6 +285,7 @@ fn test_find_uniq() {
     );
   };
   inner(&[0.0, 1.0, 0.0], 1.0);
+  inner(&[0.0, 1.0, 1.0], 0.0);
   inner(&[1.0, 1.0, 1.0, 2.0, 1.0, 1.0], 2.0);
   inner(&[3.0, 10.0, 3.0, 3.0, 3.0], 10.0);
 }

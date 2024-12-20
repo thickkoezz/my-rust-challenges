@@ -53,7 +53,7 @@ fn test_count_sheep() {
 
 // https://www.codewars.com/kata/515e271a311df0350d00000f/train/rust
 fn square_sum(vec: Vec<i32>) -> i32 {
-  vec.iter().fold(0, |sum, &x| sum + x.pow(2))
+  vec.iter().fold(0, |acc, &x| acc + x.pow(2))
 }
 
 #[test]
@@ -84,7 +84,10 @@ fn test_summation() {
 // https://www.codewars.com/kata/55f2b110f61eb01779000053/train/rust
 // use std::cmp::Ordering;
 fn get_sum(a: i64, b: i64) -> i64 {
+  // solution #1, best practice
   (a.min(b)..=a.max(b)).sum()
+
+  // solution #2
   // match a.cmp(&b) {
   //   Ordering::Equal => a,
   //   Ordering::Greater => (b..=a).into_iter().fold(0, |sum, x| sum + x),
@@ -111,6 +114,8 @@ fn test_count_sheep_2() {
   assert_eq!(count_sheep_2(&[false]), 0);
   assert_eq!(count_sheep_2(&[true]), 1);
   assert_eq!(count_sheep_2(&[true, false]), 1);
+  assert_eq!(count_sheep_2(&[true, false, false]), 1);
+  assert_eq!(count_sheep_2(&[true, false, true, true]), 3);
 }
 
 // https://www.codewars.com/kata/5583090cbe83f4fd8c000051/train/rust
@@ -296,9 +301,15 @@ fn test_fibonacci() {
 
 // https://www.codewars.com/kata/5467e4d82edf8bbf40000155/train/rust
 fn descending_order(x: u64) -> u64 {
+  // solution #1
   let mut vec = x.to_string().chars().collect::<Vec<char>>();
   vec.sort_by(|a, b| b.cmp(a));
   vec.into_iter().collect::<String>().parse::<u64>().unwrap()
+
+  // solution #2
+  // let mut vec = x.to_string().chars().map(|x| x.to_digit(10).unwrap()).collect::<Vec<_>>();
+  // vec.sort_by(|a, b| b.cmp(a));
+  // vec.into_iter().map(|x| x.to_string()).collect::<String>().parse::<u64>().unwrap()
 }
 
 #[test]
@@ -316,7 +327,6 @@ fn test_descending_order() {
 fn dna_strand(dna: &str) -> String {
   dna
     .chars()
-    .into_iter()
     .map(|ch| match ch {
       'A' => 'T',
       'T' => 'A',
@@ -369,11 +379,8 @@ fn test_is_triangle() {
 fn abbrev_name(name: &str) -> String {
   name
     .split(" ")
-    .collect::<Vec<&str>>()
-    .iter()
-    .map(|&x| {
+    .map(|x| {
       x.chars()
-        .into_iter()
         .take(1)
         .map(|x| x.to_uppercase().to_string())
         .collect()
@@ -393,16 +400,13 @@ fn test_abbrev_name() {
 
 // https://www.codewars.com/kata/559590633066759614000063/train/rust
 fn min_max(lst: &[i32]) -> (i32, i32) {
-  (
-    lst.iter().min().map(|&x| x).unwrap(),
-    lst.iter().max().map(|&x| x).unwrap(),
-  )
+  (*lst.iter().min().unwrap(), *lst.iter().max().unwrap())
 }
 
 #[test]
 fn test_min_max() {
+  let msg = "\nYour result (left) did not match the expected output (right)";
   let inner = |arr: &[i32], expected: (i32, i32)| {
-    let msg = "\nYour result (left) did not match the expected output (right)";
     assert_eq!(min_max(arr), expected, "{msg} with lst = {arr:?}")
   };
   for (arr, expected) in [
@@ -414,8 +418,15 @@ fn test_min_max() {
 }
 
 fn find_next_square(sq: u64) -> Option<u64> {
-  match ((sq as f64).sqrt()) % 1f64 {
-    0f64 => Option::from(((((sq as f64).sqrt()) + 1f64) as u64).pow(2)),
+  // solution #1
+  // match ((sq as f64).sqrt()) % 1f64 {
+  //   0f64 => Option::from(((((sq as f64).sqrt()) + 1f64) as u64).pow(2)),
+  //   _ => None,
+  // }
+
+  // solution #2
+  match (sq as f64).sqrt() {
+    n if n % 1f64 == 0f64 => Some((n + 1f64).powi(2) as u64),
     _ => None,
   }
 }

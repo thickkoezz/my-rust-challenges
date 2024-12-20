@@ -24,27 +24,27 @@ fn test_reverse_words() {
 // https://www.codewars.com/kata/55c45be3b2079eccff00010f/train/rust
 fn order(sentence: &str) -> String {
   // solution #1
-  let vec = sentence.split(" ").collect::<Vec<&str>>();
-  let mut x = 0;
-  let mut res = vec![];
-  loop {
-    if x == vec.len() {
-      break;
-    }
-    let a = (x + 1).to_string();
-    let ch = a.as_str();
-    let item = vec.iter().find(|&&x| x.contains(ch));
-    if item.is_some() {
-      res.push(*item.unwrap());
-    }
-    x += 1;
-  }
-  res.join(" ")
+  // let vec = sentence.split(" ").collect::<Vec<&str>>();
+  // let mut x = 0;
+  // let mut res = vec![];
+  // loop {
+  //   if x == vec.len() {
+  //     break;
+  //   }
+  //   let a = (x + 1).to_string();
+  //   let ch = a.as_str();
+  //   let item = vec.iter().find(|&&x| x.contains(ch));
+  //   if item.is_some() {
+  //     res.push(*item.unwrap());
+  //   }
+  //   x += 1;
+  // }
+  // res.join(" ")
 
   // solution #2, best practice
-  // let mut res: Vec<_> = sentence.split_whitespace().map(String::from).collect();
-  // res.sort_by_key(|s| s.chars().find(|c| c.is_digit(10)).unwrap());
-  // res.join(" ")
+  let mut res: Vec<_> = sentence.split_whitespace().map(String::from).collect();
+  res.sort_by_key(|s| s.chars().find(|c| c.is_digit(10)).unwrap());
+  res.join(" ")
 }
 
 #[test]

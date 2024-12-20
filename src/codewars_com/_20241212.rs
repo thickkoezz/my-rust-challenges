@@ -41,6 +41,11 @@ fn reverse_seq(n: u32) -> Vec<u32> {
   (1..=n).into_iter().rev().collect()
 }
 
+#[test]
+fn test_reverse_seq() {
+  assert_eq!(reverse_seq(5), [5, 4, 3, 2, 1].to_vec());
+}
+
 // https://www.codewars.com/kata/5772da22b89313a4d50012f7/train/rust
 fn greet(name: &str, owner: &str) -> String {
   format!("Hello {}", if name == owner { "boss" } else { "guest" })
@@ -66,30 +71,24 @@ fn test_repeat_str() {
 
 // https://www.codewars.com/kata/52dbae61ca039685460001ae/train/rust
 fn search_for_letters(str: &str) -> String {
-  let rgx = Regex::new(r"[a-zA-Z]").unwrap();
   let mut letters: Vec<char> = vec!['0'; 26];
-  for ch in str
+  let rgx = Regex::new(r"[a-zA-Z]").unwrap();
+  str
+    .to_ascii_lowercase()
     .chars()
-    .into_iter()
-    .filter(|c| rgx.is_match(c.to_string().as_str()))
-  {
-    match (ch as u8) as usize {
-      r @ 65..=90 => letters[r - 65] = '1',
-      r @ 97..=122 => letters[r - 97] = '1',
-      _ => {}
-    }
-  }
+    .filter(|c| rgx.is_match(c.to_string().as_str())) // filter #1, use regex
+    // .filter(|c| c.is_alphabetic()) // filter #2, we can use this filter instead the filter above
+    .for_each(|ch| letters[ch as usize - 97] = '1');
   letters.into_iter().collect::<String>()
 }
 
 #[test]
 fn test_search_for_letters() {
   assert_eq!(
-    search_for_letters(" cA**& zbZa"),
-    "11100000000000000000000001"
+    search_for_letters(" cA**E& zbZa"),
+    "11101000000000000000000001"
   );
 }
-const ERR_MSG: &str = "\nYour result (left) did not match the expected output (right)";
 
 // https://www.codewars.com/kata/5bb904724c47249b10000131/train/rust
 fn points(games: &[String]) -> u32 {
@@ -128,6 +127,7 @@ fn points(games: &[String]) -> u32 {
 
 #[test]
 fn test_points() {
+  const ERR_MSG: &str = "\nYour result (left) did not match the expected output (right)";
   let inner = |e: &[&str], expected: u32| {
     let a = &e.iter().map(|x| x.to_string()).collect::<Vec<_>>();
     assert_eq!(points(a), expected, "{ERR_MSG} with games = {a:?}")

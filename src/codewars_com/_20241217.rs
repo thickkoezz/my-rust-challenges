@@ -17,6 +17,7 @@ fn test_feast() {
 
 // https://www.codewars.com/kata/52efefcbcdf57161d4000091/train/rust
 fn count(input: &str) -> HashMap<char, i32> {
+  // solution #1
   input.chars().fold(HashMap::new(), |mut map, ch| {
     *map.entry(ch).or_insert(0) += 1;
     map
@@ -84,7 +85,7 @@ fn dig_pow(n: i64, p: i32) -> i64 {
   });
 
   // solution #2
-  // let r: i64 = n.to_string().chars()
+  // let res: i64 = n.to_string().chars()
   //   .map(|c| (c as i64) - 48)
   //   .enumerate()
   //   .map(|(i, d)| i64::pow(d, p as u32 + i as u32))
@@ -97,7 +98,7 @@ fn dig_pow(n: i64, p: i32) -> i64 {
 }
 
 #[test]
-fn basic_tests() {
+fn test_dig_pow() {
   let inner = |n: i64, p: i32, exp: i64| -> () {
     println!(" n: {:?};", n);
     println!("p: {:?};", p);
