@@ -26,7 +26,7 @@ fn longest_consec(strarr: Vec<&str>, k: usize) -> String {
     let x = strarr[i..i + k].join("");
     vec.push(x);
   }
-  vec.sort_by_key(|a| a.len());
+  vec.sort_by_key(String::len);
   let z = vec[vec.len() - 1].len();
   let x = vec.iter().find(|a| a.len() >= z).unwrap();
   x.clone()
